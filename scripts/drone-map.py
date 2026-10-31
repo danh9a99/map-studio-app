@@ -294,8 +294,12 @@ def cam_H(g, W, H, cx, cy, yaw, pitch, h, hfov, roll=0.0):
 # ── steps ────────────────────────────────────────────────────────────────────
 def cut_track(clip, start, dur, mp4, out_json, lo=0.0, hi=1.0):
     """A stretch of the clip at 30 fps, long side 1920, and its ground track (progress over [lo, hi] of the stage)."""
-    vw, vh = map(int, subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height:stream_side_data=rotation",
-                                      "-of", "csv=p=0", clip], capture_output=True, text=True).stdout.split("\n")[0].split(",")[:2])
+    pr = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height:stream_side_data=rotation",
+                         "-of", "csv=p=0", clip], capture_output=True, text=True)
+    size = pr.stdout.strip().split("\n")[0].split(",")[:2]
+    if len(size) < 2 or not all(v.strip().isdigit() for v in size):
+        raise RuntimeError(f"Không đọc được kích thước video: {(pr.stderr or pr.stdout).strip()[-300:] or 'ffprobe không trả lời'}")
+    vw, vh = map(int, size)
     rot = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream_side_data=rotation", "-of", "csv=p=0", clip],
                          capture_output=True, text=True).stdout.strip()
     if rot and abs(int(float(rot.split(",")[0] or 0))) % 180 == 90:

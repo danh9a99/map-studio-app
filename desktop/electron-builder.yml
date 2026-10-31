@@ -16,7 +16,6 @@ files:
   - python/**
   - bin/**
   - package.json
-  - "!**/*.map"
 publish:
   provider: github
   owner: danh9a99
@@ -27,8 +26,6 @@ mac:
   category: public.app-category.video
   # no spaces: the files go up to the release as they are, and latest-mac.yml names them
   artifactName: Map-Studio-${version}-${arch}-mac.${ext}
-  # ffprobe-static carries every platform's binary: keep this one's
-  files: ["!node_modules/ffprobe-static/bin/{win32,linux}/**", "!node_modules/ffprobe-static/bin/darwin/x64/**"]
   # ad-hoc signed ("-") until there is an Apple Developer certificate (CSC_LINK / APPLE_* secrets in CI): without any
   # signature macOS calls a downloaded app "damaged"; with this one it asks once whether to open it
   identity: "-"
@@ -36,7 +33,6 @@ mac:
   hardenedRuntime: false
 win:
   target: [{ target: nsis, arch: [x64] }]
-  files: ["!node_modules/ffprobe-static/bin/{darwin,linux}/**", "!node_modules/ffprobe-static/bin/win32/ia32/**"]
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true

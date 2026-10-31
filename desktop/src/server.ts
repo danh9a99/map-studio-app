@@ -7,7 +7,7 @@
  * <data>/runtime        Python, the SAM 2 add-on, the render's browser (setup.ts)
  * <data>/settings.json  the AI provider, its model, the keys (encrypted by the OS when Electron can)
  */
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { chmodSync, cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
 import { createRequire } from "node:module";
@@ -36,6 +36,7 @@ const MODELS: Record<Provider, string[]> = {
   anthropic: ["claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5"],
   gemini: ["gemini-flash-latest", "gemini-pro-latest"],
 };
+const WIN = process.platform === "win32";
 const KEY_ENV: Record<Provider, string> = { anthropic: "ANTHROPIC_API_KEY", gemini: "GEMINI_API_KEY" };
 const MAX_VIDEO = 8 * 1024 ** 3;
 
@@ -53,10 +54,23 @@ export async function startServer(o: ServerOptions) {
   }
   mkdirSync(pub, { recursive: true });
 
-  // ffmpeg / ffprobe for the scripts and the thumbnails: full builds from npm (Remotion's own lacks filters we use)
+  // ffmpeg for the scripts and the thumbnails: the full build from npm (Remotion's own lacks filters we use). ffprobe:
+  // Remotion's (7.1, beside its libraries; ffprobe-static is years old on Windows and the wrong CPU on Apple Silicon).
+  // On macOS it finds its libraries only through DYLD_LIBRARY_PATH, so it is reached through a small script.
   const need = createRequire(join(o.app, "package.json"));
-  const bins = [dirname(need("ffmpeg-static") as string), dirname((need("ffprobe-static") as { path: string }).path)];
-  process.env.PATH = [...bins, process.env.PATH ?? ""].join(delimiter);
+  const remotion = join(o.app, "node_modules", "@remotion");
+  const comp = readdirSync(remotion).map((d) => join(remotion, d)).find((d) => /compositor-/.test(d) && existsSync(join(d, WIN ? "ffprobe.exe" : "ffprobe")));
+  if (!comp) throw new Error("Không thấy ffprobe của Remotion");
+  let probeDir = comp;
+  if (!WIN) {
+    probeDir = join(o.data, "runtime", "bin");
+    mkdirSync(probeDir, { recursive: true });
+    const lib = process.platform === "darwin" ? "DYLD_LIBRARY_PATH" : "LD_LIBRARY_PATH";
+    writeFileSync(join(probeDir, "ffprobe"), `#!/bin/sh\n${lib}="${comp}" exec "${join(comp, "ffprobe")}" "$@"\n`);
+    chmodSync(join(probeDir, "ffprobe"), 0o755);
+  }
+  // ffmpeg-static first: on Windows the compositor's folder (on PATH for its ffprobe) has a stripped ffmpeg too
+  process.env.PATH = [dirname(need("ffmpeg-static") as string), probeDir, process.env.PATH ?? ""].join(delimiter);
 
   const rt = createSetup({ app: o.app, data: o.data, node: o.node });
   const settingsFile = join(o.data, "settings.json");

@@ -27,7 +27,7 @@ const step = (s) => console.log(`\n▸ ${s}`);
 
 step("main process and renderer");
 const common = { bundle: true, platform: "node", target: "node22", format: "cjs", logLevel: "warning",
-  external: ["electron", "electron-updater", "@remotion/renderer", "ffmpeg-static", "ffprobe-static", "vite"] };
+  external: ["electron", "electron-updater", "@remotion/renderer", "ffmpeg-static", "vite"] };
 await esbuild({ ...common, entryPoints: [join(HERE, "src", "main.ts")], outfile: join(APP, "dist", "main.cjs") });
 await esbuild({ ...common, entryPoints: [join(HERE, "src", "render.ts")], outfile: join(APP, "dist", "render.cjs") });
 
