@@ -1,0 +1,26 @@
+{
+  "name": "map-studio",
+  "private": true,
+  "description": "Roads, names and highlighted buildings that follow drone footage: the map editor and its render (the desktop app is in desktop/)",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "studio": "remotion studio src/map-index.ts"
+  },
+  "dependencies": {
+    "@remotion/bundler": "4.0.532",
+    "@remotion/google-fonts": "4.0.532",
+    "@remotion/player": "4.0.532",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "remotion": "4.0.532",
+    "vite": "8.3.2"
+  },
+  "devDependencies": {
+    "@remotion/cli": "4.0.532",
+    "@types/node": "^24.19.2",
+    "@types/react": "19.1.8",
+    "@types/react-dom": "19.1.6",
+    "typescript": "5.8.3"
+  }
+}

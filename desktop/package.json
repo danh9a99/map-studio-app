@@ -1,0 +1,19 @@
+{
+  "name": "map-studio-build",
+  "private": true,
+  "description": "Builds Map Studio, the desktop map-on-aerial-footage app (runtime package: app/package.json)",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "npm run build -- --code && tsx src/dev.ts",
+    "start": "npm run build && electron app",
+    "dist": "npm run build && electron-builder --publish never",
+    "release": "npm run build && electron-builder --publish always"
+  },
+  "devDependencies": {
+    "electron": "44.7.2",
+    "electron-builder": "26.17.0",
+    "esbuild": "0.28.2",
+    "tsx": "^4.21.0"
+  }
+}

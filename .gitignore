@@ -1,0 +1,17 @@
+node_modules/
+.DS_Store
+__pycache__/
+# runs and render outputs when the scripts are used on their own
+output/
+public/
+models/
+.venv*/
+# desktop build: the app folder's generated parts, installers, dev data
+desktop/app/dist/
+desktop/app/ui/
+desktop/app/site/
+desktop/app/scripts/
+desktop/app/python/
+desktop/app/bin/
+desktop/release/
+desktop/.dev-data/

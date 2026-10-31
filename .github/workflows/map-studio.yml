@@ -1,0 +1,58 @@
+# Map Studio installers: on a tag map-studio-v<version> (the version in desktop/app/package.json), build on
+# macOS (Apple Silicon) and Windows, and attach the .dmg / .exe to a GitHub Release. Also runnable by hand (no release).
+name: Map Studio
+
+on:
+  push:
+    tags: ["map-studio-v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-14, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Install packages
+        run: |
+          npm ci
+          npm ci --prefix desktop
+          npm ci --prefix desktop/app
+
+      - name: Check the scripts
+        shell: bash
+        run: |
+          python -m py_compile scripts/drone-map.py scripts/track.py scripts/mapcolor.py scripts/colorgrade.py scripts/segment.py
+
+      - name: Build the app folder
+        run: npm run build --prefix desktop
+
+      - name: Package (and release on a tag)
+        working-directory: desktop
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # unsigned for now; add CSC_LINK / CSC_KEY_PASSWORD (and APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID) to sign
+        shell: bash
+        run: npx electron-builder --publish ${{ startsWith(github.ref, 'refs/tags/') && 'always' || 'never' }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: map-studio-${{ matrix.os }}
+          path: |
+            desktop/release/*.dmg
+            desktop/release/*.exe
+          if-no-files-found: warn

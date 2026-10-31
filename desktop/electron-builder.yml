@@ -1,0 +1,40 @@
+# Map Studio installers: macOS (Apple Silicon) .dmg, Windows x64 .exe. Built per OS (CI matrix): the app's native
+# parts (Remotion's compositor, ffmpeg, uv) come for the machine that builds it.
+appId: vn.danng.mapstudio
+productName: Map Studio
+directories:
+  app: app
+  output: release
+  buildResources: build-res
+# the scripts and Python start Python as files on disk, and Remotion writes next to itself: no asar
+asar: false
+files:
+  - dist/**
+  - ui/**
+  - site/**
+  - scripts/**
+  - python/**
+  - bin/**
+  - package.json
+  - "!**/*.map"
+publish:
+  provider: github
+  owner: danh9a99
+  repo: map-studio-app
+  releaseType: release
+mac:
+  target: [{ target: dmg, arch: [arm64] }, { target: zip, arch: [arm64] }]
+  category: public.app-category.video
+  # ffprobe-static carries every platform's binary: keep this one's
+  files: ["!node_modules/ffprobe-static/bin/{win32,linux}/**", "!node_modules/ffprobe-static/bin/darwin/x64/**"]
+  # unsigned until there is an Apple Developer certificate (CSC_LINK / APPLE_* secrets in CI)
+  identity: null
+win:
+  target: [{ target: nsis, arch: [x64] }]
+  files: ["!node_modules/ffprobe-static/bin/{darwin,linux}/**", "!node_modules/ffprobe-static/bin/win32/ia32/**"]
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  artifactName: Map-Studio-Setup-${version}.${ext}
+dmg:
+  artifactName: Map-Studio-${version}-${arch}.${ext}

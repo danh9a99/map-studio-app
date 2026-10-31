@@ -1,0 +1,5 @@
+# the map tool's scripts (drone-map.py, track.py, mapcolor.py, colorgrade.py)
+numpy>=2.0,<3
+opencv-python-headless>=4.10,<5
+pillow>=11
+anthropic>=1.15,<2
