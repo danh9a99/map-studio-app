@@ -35,18 +35,18 @@ Cần có `uv` trên máy (https://docs.astral.sh/uv/). App dùng nó để tả
 npm run dist --prefix desktop
 ```
 
-File cài đặt nằm trong `desktop/release/`. Bản macOS chưa ký: lần đầu mở bằng chuột phải, chọn Open.
+File cài đặt nằm trong `desktop/release/`. Bản macOS mới ký tạm (chưa có tài khoản Apple Developer): lần đầu mở, macOS sẽ chặn; vào System Settings > Privacy & Security, bấm Open Anyway.
 
 ## Phát hành
 
 Sửa `version` trong `desktop/app/package.json`, commit, rồi đẩy tag cùng số phiên bản:
 
 ```bash
-git tag v0.1.1
+git tag v0.1.2
 ```
 
 ```bash
-git push origin v0.1.1
+git push origin v0.1.2
 ```
 
 GitHub Actions build bản macOS và Windows rồi đưa lên trang Releases.
