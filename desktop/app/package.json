@@ -1,7 +1,7 @@
 {
   "name": "map-studio",
   "productName": "Map Studio",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Roads, names and highlighted buildings that follow aerial (drone) footage",
   "author": "Dan Ng",
   "private": true,

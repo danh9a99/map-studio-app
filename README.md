@@ -39,14 +39,14 @@ File cài đặt nằm trong `desktop/release/`. Bản macOS chưa ký: lần đ
 
 ## Phát hành
 
-Sửa `version` trong `desktop/app/package.json`, rồi đẩy tag:
+Sửa `version` trong `desktop/app/package.json`, commit, rồi đẩy tag cùng số phiên bản:
 
 ```bash
-git tag map-studio-v0.1.0
+git tag v0.1.1
 ```
 
 ```bash
-git push origin map-studio-v0.1.0
+git push origin v0.1.1
 ```
 
 GitHub Actions build bản macOS và Windows rồi đưa lên trang Releases.
