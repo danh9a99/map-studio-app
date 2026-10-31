@@ -42,11 +42,11 @@ File cài đặt nằm trong `desktop/release/`. Bản macOS mới ký tạm (ch
 Sửa `version` trong `desktop/app/package.json`, commit, rồi đẩy tag cùng số phiên bản:
 
 ```bash
-git tag v0.1.3
+git tag v0.1.4
 ```
 
 ```bash
-git push origin v0.1.3
+git push origin v0.1.4
 ```
 
 GitHub Actions build bản macOS và Windows rồi đưa lên trang Releases.

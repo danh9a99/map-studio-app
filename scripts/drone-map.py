@@ -81,9 +81,27 @@ def status(d, step, pct=None, **kw):
         extra["pct"] = round(max(0.0, min(1.0, pct)), 3)
     _LAST.update(step=step, kw=kw, d=d)
     # written whole then swapped in: the server polls it several times a second and must never read half a file
-    tmp = os.path.join(d, "status.json.tmp")
-    json.dump({"step": step, "time": time.time(), **extra, **kw}, open(tmp, "w"), ensure_ascii=False)
-    os.replace(tmp, os.path.join(d, "status.json"))
+    body = json.dumps({"step": step, "time": time.time(), **extra, **kw}, ensure_ascii=False)
+    tmp, dst = os.path.join(d, "status.json.tmp"), os.path.join(d, "status.json")
+    with open(tmp, "w") as f:
+        f.write(body)
+    # Windows refuses the swap while another program holds the file a moment (an antivirus scan, the server's read)
+    for i in range(20):
+        try:
+            os.replace(tmp, dst)
+            return
+        except PermissionError:
+            time.sleep(0.05 * (i + 1))
+    with open(dst, "w") as f:
+        f.write(body)
+
+
+def discard(p):
+    """Remove a file the editor may still be playing: Windows will not delete it then, and a stale copy does no harm."""
+    try:
+        os.remove(p)
+    except OSError:
+        pass
 
 
 def progress(pct, msg=None):
@@ -780,7 +798,7 @@ def publish_clip(name, src):
     """Copy the clip the editor plays into public under a new name, so the browser never shows a stale one."""
     n = int(time.time())
     for old in glob.glob(os.path.join(pub_dir(name), "clip-*.mp4")):
-        os.remove(old)
+        discard(old)
     dst = os.path.join(pub_dir(name), f"clip-{n}.mp4")
     shutil.copyfile(src, dst)
     return f"map-{name}/clip-{n}.mp4"
@@ -795,7 +813,7 @@ def publish_source(name, d, fresh=False):
             shutil.copyfile(os.path.join(d, "track.mp4"), dst)
         return f"map-{name}/source.mp4"
     for old in glob.glob(os.path.join(pub_dir(name), "source*.mp4")):
-        os.remove(old)
+        discard(old)
     n = int(time.time())
     shutil.copyfile(os.path.join(d, "track.mp4"), os.path.join(pub_dir(name), f"source-{n}.mp4"))
     return f"map-{name}/source-{n}.mp4"
@@ -1223,7 +1241,7 @@ def cmd_color(name, args, full=False):
         else:
             doc["clip"], doc["baked"] = doc.get("source") or publish_source(name, d), None
             for old in glob.glob(os.path.join(pub_dir(name), "clip-*.mp4")):
-                os.remove(old)
+                discard(old)
         doc["grade"] = {**(doc.get("grade") or {}), "delog": kind}
         json.dump(doc, open(doc_f, "w"), ensure_ascii=False)
     status(d, "ready", msg="Đã tạo ảnh xem thử" if still else ("Đã chỉnh màu" if bake else "Đã bỏ LUT"))
